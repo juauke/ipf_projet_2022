@@ -10,9 +10,14 @@ Thanks to the latter, running 'make' command in a shell terminal either from the
 
 ### Running the programs
 To run each binary, you need to run the following commands in a shell terminal:
-    ./phase1 test1.txt
-    ./phase2 test2.txt
-    ./phase3 test3.txt
+
+    ./phase1 [phase1_test_file]
+    ./phase2 [phase2_test_file]
+    ./phase3 [phase3_test_file]
+
+For instance, to test the phase 1 binary with the first of its test, run:
+
+    ./phase1 test/phase1/1.txt
 
 The test file structure needs to match with the binary with whom it is being run. 
 Test files are available in `test/`.
