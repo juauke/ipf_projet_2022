@@ -8,7 +8,7 @@ let _ =
 		let table = list_to_table list in
 		let path_list = List.rev_map (
 				fun w -> let (p, _) =
-					try best_path w t with
+					try best_path w table with
 						No_way ->
 							let (si, sf) = w in
 							let _ = Printf.printf "No way from %s to %s\n" si sf in
