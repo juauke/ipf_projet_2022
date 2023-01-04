@@ -32,5 +32,5 @@ val best_path : way -> table -> path * int;;
              (t) is the table corresponding to the network correspondant au réseau
    @ensures  a list of couples (string list, integer list) which matches two for two with the borrowed modules and their depart time
              (no depart time for the arrival module)
-   @raises   Not_found if one of the routes (p) of the list (pl) is inconsistent with (t) *)
+   @raises   Not_found if one of the routes (pp) of the list (ppl) is inconsistent with (t) *)
 val best_comb_path : path list -> table -> (string list * int list) list * int;;
