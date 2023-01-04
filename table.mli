@@ -19,7 +19,7 @@ exception No_way;;
    @raises    *)
 val list_to_table : (string * string * int) list -> table;;
 
-(* @requires w = (s1, s2) -> a route exists to go from (s1) to (s2) across the network (which must be contained within (t))
+(* @requires w = (s1, s2) -> a route exists to go from (s1) to (s2) across the network (which must be present in (t))
    @ensures  returns the first the 1st route found whose travel time is the shortest
    @raises   No_way if the route is inconsistent with (t) *)
 val best_path : way -> table -> path * int;;
