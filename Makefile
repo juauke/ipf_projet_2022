@@ -17,15 +17,15 @@ p2: $(APP2)
 p3: $(APP3)
 
 %.cmi: %.mli
-	mkdir -p objs 1>/dev/null
+	mkdir -p objs
 	$(CAMLC) -c $<
 
 %.cmo: %.ml $(INT)
-	mkdir -p objs 1>/dev/null
+	mkdir -p objs
 	$(CAMLC) -c $<
 
 %: $(OBJ) %.cmo
-	mkdir -p bin 1>/dev/null
+	mkdir -p bin
 	$(CAMLC) -o $@ $^
 
 .PHONY: clean
