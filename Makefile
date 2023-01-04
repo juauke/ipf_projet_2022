@@ -1,6 +1,6 @@
-APP1 = phase1
-APP2 = phase2
-APP3 = phase3
+APP1 = bin/phase1
+APP2 = bin/phase2
+APP3 = bin/phase3
 
 CAMLC = ocamlc
 .PRECIOUS: %.cmi %.cmo
@@ -24,7 +24,7 @@ p3: $(APP3)
 	mkdir -p objs
 	$(CAMLC) -c $<
 
-%: $(OBJ) %.cmo
+bin/%: $(OBJ) %.cmo
 	mkdir -p bin
 	$(CAMLC) -o $@ $^
 
