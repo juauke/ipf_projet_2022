@@ -21,7 +21,6 @@ p3: $(APP3)
 	$(CAMLC) -c $<
 
 %.cmo: %.ml $(INT)
-	mkdir -p objs
 	$(CAMLC) -c $<
 
 bin/%: $(OBJ) %.cmo
