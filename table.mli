@@ -10,7 +10,7 @@ type table;;
 exception No_way;;
 
 (* @requires 
-   @ensures    the table matching with the list of the couples of paths
+   @ensures   the table matching with the list of the couples of paths
                The way (s1, s2, d) links the stations (s1) et (s2) in a time (d)
                A table is a Map whose elements have a string (s1) as their key
                Those elements are a Map whose elements have a string (s2) as their key
