@@ -10,11 +10,11 @@ SRC = $(wildcard *.mli)
 INT = $(SRC:.mli=.cmi)
 OBJ = $(SRC:.mli=.cmo)
 
-all: $(APP1) $(APP2) $(APP3)
+all: p1 p2 p3
 
-phase1: $(APP1)
-phase2: $(APP2)
-phase3: $(APP3)
+p1: $(APP1)
+p2: $(APP2)
+p3: $(APP3)
 
 %.cmi: %.mli
 	$(CAMLC) -c $<
