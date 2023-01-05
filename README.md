@@ -31,6 +31,6 @@ Test files are available in `test/`.
 - *print.ml* lists the display functions of the different structures used in the *table* module.
 
 ## Report
-The report is avaiable in PDF format and its LaTeX is provided in `/doc`.
+The report is available in PDF format and its LaTeX is provided in `/doc`.
 
 N.B.: analysis module (including its implementation) was provided but in French. Therefore, it was translated in English for this project purpose.
