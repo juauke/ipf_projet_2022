@@ -1,6 +1,6 @@
 # Functional programming project
 
-## Use
+## How to use
 
 ### Compiling
 The source files are located in `src/`.
@@ -8,7 +8,7 @@ The source files are located in `src/`.
 To compile all 3 phases of the project, a Makefile is available. <br/>
 Thanks to the latter, running 'make' command in a shell terminal either from the project root or in `src/` will compile the project.
 
-### How to use
+### How to run
 To run each binary, you need to run the following commands in a shell terminal:
 
     ./bin/phase1 [phase1_test_file]
