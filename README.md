@@ -8,14 +8,14 @@ The source files are located in `src/`.
 To compile all 3 phases of the project, a Makefile is available. <br/>
 Thanks to the latter, running 'make' command in a shell terminal either from the project root or in `src/` will compile the project.
 
-### Running the programs
+### How to use
 To run each binary, you need to run the following commands in a shell terminal:
 
     ./bin/phase1 [phase1_test_file]
     ./bin/phase2 [phase2_test_file]
     ./bin/phase3 [phase3_test_file]
 
-For instance, to test the phase 1 binary with the first of its test, run:
+For instance, to test the phase 1 binary with the its first test, run:
 
     ./bin/phase1 test/phase1/1.txt
 
