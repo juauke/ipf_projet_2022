@@ -17,7 +17,6 @@ p2: dirs $(APP2)
 p3: dirs $(APP3)
 
 dirs:
-	@mkdir -p ../objs
 	@mkdir -p ../bin
 
 %.cmi: %.mli
@@ -32,5 +31,5 @@ dirs:
 .PHONY: clean
 
 clean:
-	rm -f $(APP1) $(APP2) $(APP3) *.cm[io] 2>/dev/null
-	rm -r ../objs ../bin 2>/dev/null
+	rm -f *.cm[io] 2>/dev/null
+	rm -r ../bin 2>/dev/null
