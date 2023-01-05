@@ -1,0 +1,316 @@
+\documentclass[11pt, a4paper, twoside, titlepage]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[a4paper]{geometry}
+\usepackage{french}
+
+
+\geometry{hscale=0.75,vscale=0.75,centering}
+\font\titlefont=cmr12 at 21pt
+
+\usepackage{fancyhdr}
+
+\usepackage{minted}
+
+% Links in table of contents
+\usepackage{hyperref}
+\hypersetup{
+    colorlinks,
+    citecolor=black,
+    filecolor=black,
+    linkcolor=black,
+    urlcolor=black
+}
+
+% [H] for figure
+\usepackage{float}
+
+\begin{document}
+
+\pagestyle{fancy}
+
+\fancyhead{}\fancyfoot{}
+
+
+\fancyhead[OC]{PRFO --- Projet : Planificateur de tâches dans une base martienne}
+\fancyhead[EC]{Justin \textsc{BABONNEAU}}
+
+\fancyfoot[C]{\thepage}
+
+\title{{\titlefont \textbf{Projet} de programmation fonctionnelle}\\
+\texttt{Planificateur de tâches dans une base martienne}\\
+réalisé en \textit{OCaml}}
+\author{Justin \textsc{BABONNEAU}}
+\date{\today} 
+\maketitle
+
+\section*{Introduction}
+
+L'objectif de ce projet était de proposer un planificateur de déplacements dans une base martienne, avec pour principale contrainte de le réaliser en utilisant exclusivement la partie fonctionnelle d'OCaml.\\
+\\
+Une base martienne est composée de modules tous suffisamment spacieux pour contenir la totalité de la colonie. Le passage entre deux modules se fait via un système de tunnels de longueurs variables et chacun ne permettant que le passage d'une personne à la fois. Bien entendu, nous désirons que le système s'adapte à tout plan de base que nous lui soumettons.\\
+\\
+Notre colonie s'est développée en trois étapes :
+\begin{enumerate}
+\item dans un premier temps, pour des problèmes de sécurité, notre colonie a été réduite à un seul individu ;
+\item dans un second temps, le développement aidant, de nombreux individus ont peuplé notre colonie mais le système avait la simple tâche de réguler leurs déplacements ;
+\item enfin, la capacité de calcul aidant, le système a permis la planification totale des déplacements.
+\end{enumerate}
+
+\newpage
+
+
+\tableofcontents
+
+
+\newpage
+
+\section{Phase I}
+
+Pour cette phase, seul le déplacement d'un unique individu souhaitant aller d'un module de la station à un autre à travers le réseau de la base doit être géré. L'objectif est de trouver l'itinéraire qui minimise le temps de parcours.\\
+Pour ce faire, nous connaissons son emplacement d'origine et celui qu'il souhaite atteindre, ainsi que le plan de la base, récupéré sous forme d'une liste de triplets indiquant le trajet entre deux modules et son temps de parcours.\\
+
+
+\subsection{Structures de données}
+
+Puisque les tunnels reliant les modules sont à double sens, une structure capable de récupérer le temps de trajet entre deux stations s'avérait nécessaire. Elle devait également permettre à l'algorithme de recherche de rapidement trouver le temps séparant deux modules, sans avoir à parcourir l'ensemble des données jusqu'à trouver celle souhaitée (si elle existe).\\
+C'est pourquoi, le plan de la base était au début enregistré sous la forme d'une \texttt{Map} de \texttt{Maps} d'entiers, et dont la clé associée à un élément dans une \texttt{Map} est une chaîne de caractères.\\
+
+La clé d'un élément de la \texttt{Map} principal correspond au nom d'un module. Cet élément est une sous-\texttt{Map} dont la clé de chaque élément est le nom d'un module vers lequel on peut se rendre directement à partir du premier. Ces éléments étaient au début des entiers correspondant au temps de parcours entre ces deux modules. Cependant, à partir de la phase II, l'utilisation d'un couple d'entiers s'est avérée nécessaire, ce qui explique que l'algorithme de la phase I utilise cette nouvelle structure de données, mais sans s'occuper du deuxième entier du couple.\\
+
+
+\subsection{Algorithme de recherche de parcours optimal}
+
+Cet algorithme prend en entrée le plan de la base, la station de départ et celle d'arrivée du voyageur, inscrites comme un couple de chaînes de caractères.\\
+
+Pour trouver l'itinéraire le plus rapide, le plan de la base est considéré comme un arbre dont la racine est la station de départ. Chaque branche de l'arbre fait apparaître au maximum une fois une station. La recherche se fait en profondeur.\\
+Le premier but est d'arriver jusqu'à un noeud de l'arbre dont la clé est la station d'arrivée. Tant qu'il n'y est pas parvenu, il parcours l'ensemble des chemins. Lorsqu'il trouve un noeud correspondant à la station d'arrivée, il s'arrête et enregistre le temps de parcours comme temps minimal.\\
+Le prochain objectif est de trouver un itinéraire dont le temps de parcours est strictement inférieur à celui trouvé précédemment. Pour ce faire, l'algorithme parcourt l'ensemble des branches qui n'ont pas encore été explorées. S'il n'est pas encore tombé sur un noeud de la station d'arrivée et que le temps de trajet dépasse le temps minimal trouvé jusqu'à présent, la recherche s'arrête dans cette branche. En revanche, s'il trouve un itinéraire entre les deux modules dont le temps est plus court que l'ancien, on l'enregistre comme nouveau temps minimal.\\
+L'action est répétée jusqu'à ce que toutes les branches de l'arbre aient été explorées.
+Si plusieurs itinéraires présentent le même temps de parcours, celui trouvé en premier sera renvoyé. Si aucun chemin n'est trouvé, il lève une exception.\\
+
+Cet algorithme permet de connaître à coup sûr l'itinéraire le plus rapide entre deux stations, puisqu'il essaye toutes les possibilités, mais le fait intelligemment en arrêtant le calcul sur un chemin lorsque le temps de trajet a dépassé le temps minimal trouvé précédemment.\\
+
+\clearpage
+
+\section{Phase II}
+
+Lors de cette phase, on doit être capable de trouver le meilleur ordonnancement entre plusieurs itinéraires donnés en entrée du programme. Ce dernier devra alors afficher ces itinéraires en indiquant l'heure de départ des voyageurs dans chaque tunnel reliant un module à un autre.\\
+La principale contrainte de ce problème réside dans le fait que deux personnes ne peuvent pas se trouver dans le même tunnel en même temps, que ce soit dans un sens comme dans l'autre.\\
+
+
+\subsection{Structures de données}
+
+Afin de connaître l'heure de départ d'une station d'un voyageur, la structure d'un itinéraire utilisée pour le calcul est une liste de couples. Ces couples sont formés d'une chaîne de caractères permettant de stocker le nom du module, et d'un entier représentant le temps de départ correspondant. En revanche, la structure utilisée pour son affichage est un couple de listes : une pour le nom des stations et une pour les temps de départ.\\
+
+L'ensemble des itinéraires est stocké dans une liste, permettant ainsi à l'algorithme de suivre un ordre de résolution précis.\\
+
+La structure de données correspondant au plan de la base est la même que celle de la phase I. Il s'agit d'une \texttt{Map} de \texttt{Maps} de couples, eux-mêmes constitués de deux entiers : un représentant le temps de trajet entre deux modules, l'autre servant à stocker le temps restant avant que ce trajet ne soit libéré et puisse accueillir un autre usager.
+
+
+\subsection{Algorithme de recherche de meilleure combinaison d'itinéraires}
+
+La première action réalisée par l'algorithme à la réception des données est de classer la liste des itinéraires par temps de trajet décroissant, puis par nombre de modules décroissant ; le haut de la liste est donc constituée des trajets les plus longs en temps et passant par le plus de stations. Ces trajets sont considérés comme prioritaires dans la gestion des conflits, car ce sont eux qui pourront le moins s'adapter aux autres.\\
+L'algorithme lance ensuite le voyage de nos usagers virtuels, en commençant par les itinéraires les plus longs. Lorsqu'un individu s'engage dans un tunnel, le temps de départ de ce dernier est mis à jour dans la liste correspondant à son itinéraire. Dans la structure de la base, le temps de traversée d'un tunnel est attribué au temps d'attente avant d'être à nouveau disponible. Dès qu'un voyageur souhaite s'engager dans un tunnel en cours d'utilisation, il est mis en attente jusqu'à que ce soit son tour.\\
+Lorsque tous les voyageurs pouvant s'engager dans un tunnel l'ont fait, on incrémente le temps total de 1 et on décrémente tous les temps d'attente non nuls de la structure de la base.\\
+Cette procédure est répétée jusqu'à ce que tous les voyageurs soient arrivés à destination. On aura alors accès à leur heure de départ pour chaque module, ainsi qu'au temps d'arrivée global.\\
+
+L'algorithme utilisé est un algorithme glouton ; il ne donne pas forcément la solution la plus optimale mais s'en approche avec une faible utilisation des ressources. Compte tenu de la faible capacité de calcul présente à ce stade sur la base, ce type d'algorithme semble ainsi être un bon choix.\\
+Dans le but d'obtenir de meilleurs résultats, mais avec une utilisation des ressources presque identique, une amélioration a été apportée. Il a été remarqué que le plus souvent, faire attendre pendant un cycle un voyageur arrivé dans une station pour faire partir un autre pas encore arrivé et dont le trajet est plus long, est souvent plus intéressant. C'est pourquoi, si le système remarque qu'un de ses utilisateurs est dans ce cas et arrive dans un module au prochain cycle, l'autre usager est mis en attente.\\
+
+La dernière étape ayant lieu après la résolution du problème est la conversion de la structure des itinéraires, passant d'une liste de couples à un couple de listes. Cependant, un simple \texttt{List.split} ne suffit pas, étant donné que la liste des stations comprenant $n$ stations voit sa liste de temps associée être de longueur $n-1$.\\
+
+\clearpage
+
+\section{Phase III}
+
+Lors de cette phase, le système doit être capable d'ordonnancer le déplacement de plusieurs individus à la fois, avec pour seules données d'entrées le plan de la base et les modules de départ et d'arrivée des différents usagers.\\
+
+
+\subsection{Structures de données}
+
+Les structures de données utilisées sont les mêmes que celles employées lors de la phase II.\\
+
+\subsection{Algorithme de gestion des voyageurs}
+
+L'algorithme de la phase I établissant le meilleur itinéraire entre deux modules, et celui de la phase II pouvant donner un ordonnancement presque optimal de plusieurs itinéraires, ces deux algorithmes ont été intégralement réutilisés pour la résolution de la phase III.\\
+Pour commencer, on lance l'algorithme de recherche de parcours optimal sur l'ensemble des couples (station de départ, station d'arrivée) donnés en entrée, dont on stocke les résultats dans une liste. On donne ensuite cette liste à l'algorithme de recherche de meilleure combinaison d'itinéraires, qui se charge de l'ordonner et d'en tirer une bonne combinaison minimisant au mieux le temps de parcours global des voyageurs.\\
+
+Cette solution comprend un algorithme (celui de la phase II) dont le résultat n'est pas toujours optimal, ce qui le rend lui-même imparfait. Cependant, même en considérant que l'algorithme utilisé donne une solution parfaite, l'utilisation du meilleur itinéraire d'un usager entre deux stations ne garantit pas que le temps obtenu par leur combinaison soit le meilleur possible, puisque la meilleure combinaison peut comprendre des parcours individuels non optimaux.\\
+Un algorithme donnant une solution optimal pour la phase III devrait par conséquent prendre en compte l'ensemble des chemins permettant à un voyageur de se rendre d'un module à un autre, ainsi que la totalité de leur combinaisons, ce qui serait extrêmement lourd en calcul.\\
+
+\clearpage
+
+\appendix
+\section{Annexes}
+
+\subsection{Compléments de code}
+
+Des fonctions présentes dans le fichier $print.ml$ sont disponibles et permettent d'afficher les différentes structures de données utilisées dans $table.ml$, contenant l'ensemble des fonctions utilisées pour le fonctionnement des algorithmes.\\
+
+\clearpage
+
+\subsection{Codes de tests}
+
+% include #3 language code with minted as a figure
+% usage: \fm{path_to_code}{caption (will be in \texttt)}{language}
+\newcommand{\fm}[3]{
+\begin{figure}[H]
+    \centering
+    \inputminted[]{#3}{#1}
+    \caption{\texttt{#2}}
+    %\label{fig:#2}
+\end{figure}
+}
+
+% include text with minted as a figure
+% usage: \fm{path_to_code}{caption (will be in \texttt)}
+\newcommand{\fmt}[2]{\fm{#1}{#2}{text}}
+
+% Two minted figures
+% usage: \tmf{path_to_code1}{code1_caption}{path_to_code2}{code2_caption}
+\newcommand{\tmf}[4]{
+\begin{figure}[H]
+   \begin{minipage}{0.48\textwidth}
+     \centering
+     \inputminted[]{text}{#1}
+     \caption{\texttt{#2}}
+     %\label{fig:#2}
+   \end{minipage}\hfill
+   \begin{minipage}{0.48\textwidth}
+     \centering    
+    \inputminted[]{text}{#3}
+     \caption{\texttt{#4}}
+     %\label{fig:#4}
+   \end{minipage}
+\end{figure}
+}
+
+% Roman numerals for subsubsections after this line
+\renewcommand{\thesubsubsection}{\thesubsection.\Roman{subsubsection}}
+
+% Testing code formatting
+% \cdt{test_number}
+\newcommand{\cdt}[1]{
+\begin{center}
+    \ttfamily
+    \huge
+    Code de test #1
+
+\end{center}
+}
+
+% Testing code #1 formatting for phase #2
+% usage: \tc{test_number}{phase_number}{test_code}{out_code}
+\newcommand{\tc}[4]{
+\cdt{#1}
+
+\tmf{#3}{Entrée du test #1}{#4}{Sortie du test #1}
+}
+
+% Testing code #1 formatting for phase I
+% usage: \tcp{test_number}{test_code}{out_code}
+\newcommand{\tci}[3]{\tc{#1}{1}{#2}{#3}}
+    
+    \subsubsection{Phase I}
+
+\tci{1}{../test/phase1/1.txt}{../test/out/phase1/1.txt}
+\tci{2}{../test/phase1/2.txt}{../test/out/phase1/2.txt}
+\tci{3}{../test/phase1/3.txt}{../test/out/phase1/3.txt}
+
+\clearpage
+
+\cdt{4}
+
+\begin{figure}[H]
+   \begin{minipage}{0.33\textwidth}
+     \centering
+     \inputminted[]{text}{../test/phase1/4.txt}
+     \caption{Entrée du test 4}
+     \label{fig:I4_in}
+   \end{minipage}\hfill
+   \begin{minipage}{0.33\textwidth}
+     \centering    
+    \inputminted[]{text}{../test/out/phase1/4.txt}
+     \caption{Sortie du test 4}
+     \label{fig:I4_out}
+   \end{minipage}   
+   \begin{minipage}{0.33\textwidth}
+     \centering    
+    \inputminted[]{text}{../test/out/phase1/err_4.txt}
+     \caption{Erreur du test 4}
+     \label{fig:I4_err}
+   \end{minipage}
+\end{figure}
+
+\tci{5}{../test/phase1/5.txt}{../test/out/phase1/5.txt}
+
+\clearpage
+
+\tci{6}{../test/phase1/6.txt}{../test/out/phase1/6.txt}
+\tci{7}{../test/phase1/7.txt}{../test/out/phase1/7.txt}
+
+\clearpage
+
+\tci{8}{../test/phase1/8.txt}{../test/out/phase1/8.txt}
+\tci{9}{../test/phase1/9.txt}{../test/out/phase1/9.txt}
+\tci{10}{../test/phase1/10.txt}{../test/out/phase1/10.txt}
+
+\clearpage
+
+% Testing code #1 formatting for phase II
+% usage: \tcii{test_number}{test_code}{out_code}
+\newcommand{\tcii}[3]{\tc{#1}{2}{#2}{#3}}
+
+    \subsubsection{Phase II}
+
+\tcii{1}{../test/phase2/1.txt}{../test/out/phase2/1.txt}
+\tcii{2}{../test/phase2/2.txt}{../test/out/phase2/2.txt}
+\tcii{3}{../test/phase2/3.txt}{../test/out/phase2/3.txt}
+
+\clearpage
+
+\tcii{4}{../test/phase2/4.txt}{../test/out/phase2/4.txt}
+
+\clearpage
+
+% Testing code #1 formatting for phase III
+% usage: \tciii{test_number}{test_code}{out_code}
+\newcommand{\tciii}[3]{\tc{#1}{3}{#2}{#3}}
+
+    \subsubsection{Phase III}
+
+\tciii{1}{../test/phase3/1.txt}{../test/out/phase3/1.txt}
+\tciii{2}{../test/phase3/2.txt}{../test/out/phase3/2.txt}
+
+\clearpage
+
+\tciii{3}{../test/phase3/3.txt}{../test/out/phase3/3.txt}
+
+\clearpage
+
+\cdt{4}
+
+\begin{figure}[H]
+   \begin{minipage}{0.34\textwidth}
+     \centering
+     \inputminted[]{text}{../test/phase3/4.txt}
+     \caption{Entrée du test 4}
+     \label{fig:III4_in}
+   \end{minipage}\hfill
+   \begin{minipage}{0.33\textwidth}
+     \centering    
+    \inputminted[]{text}{../test/phase3/4.txt}
+     \caption{Sortie du test 4}
+     \label{fig:III4_out}
+   \end{minipage}\hfill
+   \begin{minipage}{0.33\textwidth}
+     \centering    
+    \inputminted[]{text}{../test/out/phase3/err_4.txt}
+     \caption{Erreur du test 4}
+     \label{fig:III4_err}
+   \end{minipage}
+\end{figure}
+
+\tciii{5}{../test/phase3/5.txt}{../test/out/phase3/4.txt}
+
+\end{document}
