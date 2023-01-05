@@ -5,7 +5,7 @@
 ### Compiling
 The source files are located in `src/`.
 
-To compile all 3 phases of the project, a Makefile is available. <br/>
+To compile all 3 phases of the project, a Makefile (2 actually, but only one is needed for compiling) is available. <br/>
 Thanks to the latter, running 'make' command in a shell terminal either from the project root or in `src/` will compile the project.
 
 ### How to run
