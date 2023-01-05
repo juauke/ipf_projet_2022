@@ -1,33 +1,14 @@
-APP1 = bin/phase1
-APP2 = bin/phase2
-APP3 = bin/phase3
+all:
+	$(MAKE) -C src/
 
-CAMLC = ocamlc
-.PRECIOUS: %.cmi %.cmo
-
-# SRC = analysis.mli table.mli
-SRC = $(wildcard *.mli)
-INT = $(SRC:.mli=.cmi)
-OBJ = $(SRC:.mli=.cmo)
-
-all: p1 p2 p3
-
-p1: $(APP1)
-p2: $(APP2)
-p3: $(APP3)
-
-%.cmi: %.mli
-	mkdir -p objs
-	$(CAMLC) -c $<
-
-%.cmo: %.ml $(INT)
-	$(CAMLC) -c $<
-
-bin/%: $(OBJ) %.cmo
-	mkdir -p bin
-	$(CAMLC) -o $@ $^
+p1: 
+	$(MAKE) -C src/ p1
+p2: 
+	$(MAKE) -C src/ p2
+p3: 
+	$(MAKE) -C src/ p3
 
 .PHONY: clean
 
 clean:
-	rm -rf $(APP1) $(APP2) $(APP3) *.cm[io] 2>/dev/null
+	$(MAKE) -C src/ clean
